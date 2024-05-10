@@ -35,4 +35,4 @@ replay_pid*
 /mvnw.bat
 mvnw.cmd
 
-*.log*
+*.log*!/application.properties
