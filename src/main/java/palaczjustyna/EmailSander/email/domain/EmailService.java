@@ -3,6 +3,7 @@ package palaczjustyna.EmailSander.email.domain;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,10 +25,22 @@ public class EmailService {
     @Value("${email.max.retry}")
     private Integer maxRetry;
 
+    @Value(value = "${kafka.groupId}")
+    public String groupId;
+
+    @Value(value = "${kafka.topic}")
+    public String topic;
+
     public String createEmail(Email email) {
         email.setStatus(EmailStatus.TO_SEND);
         emailRepository.save(email);
-        return "Email created sucessfuly";
+        return "Email created successfully";
+    }
+
+    @KafkaListener(topics =  "#{__listener.topic}", groupId = "#{__listener.groupId}")
+    public void listenEmails(Email email) {
+        System.out.println("Received Message from kafka email: " + email);
+        createEmail(email);
     }
 
     public List<Email> getAllEmails() {
